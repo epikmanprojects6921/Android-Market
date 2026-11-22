@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Android Market</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#8aa626; --lgreen:#b3d233; --orange:#f58a1f; --blue:#2b8fd8; --red:#cc3b3b;
+  --ink:#222; --muted:#888; --line:#dcdcdc; --link:#2a6ebb;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:#e8e8e8;color:var(--ink);font:13px/1.45 Arial,Helvetica,sans-serif}
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #4d90fe;outline-offset:2px}
+.view[hidden]{display:none}
+
+/* Google-style black bar */
+.gbar{background:#2d2d2d;color:#fff;height:30px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:13px}
+.gbar span{margin-right:14px}
+.gbar .r span{margin:0 0 0 14px}
+.gbar b{font-weight:bold}
+
+.page{max-width:1026px;margin:0 auto;background:#fff;box-shadow:0 0 8px rgba(0,0,0,.18)}
+
+/* header */
+.hd{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;padding:6px 14px 6px 14px;min-height:58px}
+.logo{display:flex;align-items:center;gap:8px;font:300 38px/1 "Open Sans",Arial,sans-serif;color:#99b82a;letter-spacing:-.5px;margin-right:auto;text-shadow:0 1px 0 #fff,0 -1px 0 rgba(60,80,10,.25)}
+.logo svg{filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+.beta{align-self:flex-start;margin:10px 0 0 -2px;font:700 11px/1 Arial,sans-serif;letter-spacing:0;text-transform:lowercase;color:#fff;background:linear-gradient(#f9a04a,#e0701a);border:1px solid #c05c10;border-radius:8px;padding:3px 7px;text-shadow:0 -1px 0 rgba(0,0,0,.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 2px rgba(0,0,0,.3)}
+.nav{display:flex;gap:6px}
+.nav a{font-size:15px;padding:6px 10px;color:#444}
+.nav a::after{content:"\25BE";font-size:10px;margin-left:5px;color:#666}
+.nav a.on{color:#000;font-weight:bold}
+.srch{display:flex;align-items:center;border:1px solid #999;height:26px;width:200px;background:#fff}
+.srch input{flex:1;min-width:0;border:0;padding:0 6px;font-size:13px;height:100%;outline:none}
+.srch svg{margin-right:6px;fill:#888}
+
+.signin{font-weight:bold;font-size:13px;color:#444;padding:6px 4px}
+.signin:hover{text-decoration:underline}
+/* hero */
+.hero{display:grid;grid-template-columns:1fr 2fr 1fr;height:240px;border-bottom:5px solid #333;position:relative}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:-11px;height:6px;background:repeating-linear-gradient(135deg,#444 0 2px,#999 2px 4px)}
+.hp{display:flex;align-items:center;justify-content:center;font:700 40px/1 "Open Sans",Arial,sans-serif;text-align:center;padding:10px}
+.hp.l{background:linear-gradient(135deg,#3b3b3b,#7a7a7a);color:#fff;opacity:.55}
+.hp.r{background:linear-gradient(135deg,#ffd7a8,#f7a24b);color:#fff;opacity:.6}
+.hp.c{background:#fff;flex-direction:column;position:relative;background-image:radial-gradient(circle at 15% 85%,#f7c948 0 40px,transparent 41px),radial-gradient(circle at 90% 90%,#7fc241 0 55px,transparent 56px),radial-gradient(circle at 80% 8%,#e5533d 0 36px,transparent 37px),radial-gradient(circle at 8% 12%,#3b9ddd 0 34px,transparent 35px)}
+.hp.c h2{margin:0;font:700 44px/1.1 "Open Sans",Arial,sans-serif;color:#ee7a1d}
+.hp.c p{margin:8px 0 0;font:600 22px/1.2 "Open Sans",Arial,sans-serif;color:#111}
+.hp.c .badge{position:absolute;left:0;bottom:16px;background:#222;color:#fff;font:700 13px Arial;padding:6px 10px}
+
+/* categories + tiles */
+.top{display:grid;grid-template-columns:275px 1fr;gap:20px;padding:30px 24px 24px 14px}
+.cats{padding-left:0}
+.cat{display:flex;align-items:center;height:56px;background:#eee;margin-bottom:4px;font:300 22px "Open Sans",Arial,sans-serif;text-transform:uppercase}
+.cat i{width:78px;height:56px;margin-right:12px;margin-left:0;display:grid;place-items:center;color:#fff;font-style:normal;font-size:24px}
+.cat.a{color:var(--green)}.cat.a i{background:var(--lgreen)}
+.cat.g{color:var(--orange)}.cat.g i{background:var(--orange)}
+.cat.v{color:var(--blue)}.cat.v i{background:var(--blue)}
+.cat.m{color:var(--red)}.cat.m i{background:var(--red)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:114px;gap:14px 20px}
+.tile{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8px;border-bottom:5px solid var(--blue);background:#f4f4f4}
+.tile b{font:600 26px/1.1 "Open Sans",Arial,sans-serif}
+.tile small{font-size:12px;margin-top:4px}
+.tile.dk{background:#3a3a3a;color:#fff}
+.tile.o{border-bottom-color:var(--orange)}
+.tile.rd{border-bottom-color:var(--red)}
+.tile.o b{color:#f07b10}
+
+/* main */
+.main{display:grid;grid-template-columns:318px 1fr;border-top:3px double #ccc}
+.side{border-right:3px double #ccc}
+.sblock{padding:26px 34px 24px;border-bottom:3px double #ccc}
+.sblock:last-child{border-bottom:0}
+h3{font:400 22px "Open Sans",Arial,sans-serif;margin:0 0 14px}
+.g h3,.g{--c:var(--green)}.o3 h3{color:var(--orange)}
+.sblock.g h3{color:var(--green)}
+.row{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.row .n{font:700 22px Arial;color:#444;width:45px}
+.row b{display:block;font-size:13px;font-weight:bold}
+.row span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase}
+.more{display:block;margin:14px 0 0;color:var(--link);font-size:13px}
+.more::after{content:" \203A"}
+.empty{color:var(--muted);padding:6px 0 10px}
+
+.sec{position:relative;padding:26px 30px 14px;border-bottom:3px double #ccc}
+.sec:last-child{border-bottom:0}
+.sec h3{margin-bottom:12px}
+.sec.g h3{color:var(--green)}.sec.b h3{color:var(--blue)}
+.tab{position:absolute;right:-4px;top:14px;width:77px;height:40px;display:grid;place-items:center;color:#fff;font-size:20px;border-radius:2px 0 0 2px}
+.sec.g .tab{background:var(--lgreen)}.sec.b .tab{background:var(--blue)}
+.items{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.item{min-width:0}
+.ic{display:block;width:78px;height:78px;border-radius:14px;background:linear-gradient(#5aa9e6,#1f6fb5);position:relative;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.ic::after{content:"";position:absolute;left:29px;top:21px;border-left:26px solid #fff;border-top:18px solid transparent;border-bottom:18px solid transparent}
+.item b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dv{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;margin:2px 0 4px}
+.ib{display:inline-block;background:#8f8f8f;color:#fff;font:bold 10px Arial;padding:3px 6px;border:2px solid #ddd;border-radius:1px;text-transform:uppercase}
+.ib:hover{background:#6f6f6f}
+.allr{text-align:right;margin-top:26px}
+.allr a{color:var(--link)}.allr a::after{content:" \203A"}
+
+/* footer */
+.ft{background:#3a3a3a;color:#fff;text-align:center;padding:26px 14px;font-size:13px;margin-top:0}
+.ft span{margin:0 14px}
+.ft select{font-size:12px;margin:0 6px}
+.legal{max-width:1026px;margin:0 auto;text-align:center;color:#888;font-size:11px;padding:10px 14px 28px}
+
+.fl:hover{text-decoration:underline}
+.auth{max-width:360px}
+.auth label{display:block;margin:12px 0 0;color:var(--muted);font-size:12px;text-transform:uppercase}
+.auth input{display:block;width:100%;margin-top:4px;padding:8px;border:1px solid #aaa;font:14px Arial;color:var(--ink)}
+.atabs{display:flex;gap:4px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.at{background:none;border:0;border-bottom:3px solid transparent;padding:8px 12px;font:15px Arial;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+.at.on{color:var(--ink);font-weight:bold;border-bottom-color:var(--green)}
+.aerr{color:#c0392b;min-height:20px;margin:8px 0}
+.anote{color:var(--muted);font-size:12px;margin-top:14px}
+.sb{background:#f4f4f4;border:1px solid #bbb;color:#444;font:bold 15px Arial;padding:9px 22px;border-radius:2px;cursor:pointer;margin-left:10px}
+.sb:hover{background:#e6e6e6}
+/* simple pages */
+.pad{padding:26px 30px 34px}
+.crumbs{color:var(--muted);margin-bottom:16px}.crumbs a{color:var(--link)}
+.dhead{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start;margin-bottom:26px}
+.dhead .ic{width:110px;height:110px;border-radius:20px;margin:0}
+.dhead .ic::after{left:42px;top:30px;border-left:36px solid #fff;border-top:25px solid transparent;border-bottom:25px solid transparent}
+.dhead h1{font:400 30px/1.15 "Open Sans",Arial,sans-serif;color:var(--green);margin:0 0 2px}
+.big{display:inline-block;margin-top:12px;background:linear-gradient(#a8cc3c,#7fa21a);border:1px solid #6b8a12;color:#fff;font:bold 15px Arial;padding:10px 34px;border-radius:2px;text-shadow:0 -1px 0 rgba(0,0,0,.3)}
+.big:hover{filter:brightness(1.07)}
+.sv{background:#f4f4f4;border:1px solid #bbb;color:#444;font:bold 10px Arial;padding:3px 7px;border-radius:1px;cursor:pointer;margin-left:4px;text-transform:uppercase;vertical-align:top}
+.sv:hover{background:#e6e6e6}
+.bigsv{font-size:15px;padding:9px 22px;margin-left:10px;margin-top:12px}
+.vt{width:100%;border-collapse:collapse;margin-bottom:8px}
+.vt th,.vt td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+.vt th{color:var(--muted);font-weight:normal;font-size:11px;text-transform:uppercase}
+.vt td:last-child,.vt th:last-child{text-align:right}
+.tag{background:#e6f2c7;border:1px solid #b9d67a;color:#4a6d0a;font-size:11px;padding:0 5px;border-radius:2px;margin-left:6px}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:6px 20px}
+.dl dt{color:var(--muted)}.dl dd{margin:0}.dl a{color:var(--link)}
+p{margin:0 0 10px}
+
+@media(max-width:860px){
+  .hero{grid-template-columns:1fr;height:210px}
+  .hp.l,.hp.r{display:none}
+  .hp.c h2{font-size:32px}.hp.c p{font-size:17px}
+  .top{grid-template-columns:1fr;padding:22px 16px 18px}
+  .tiles{grid-template-columns:1fr 1fr}
+  .main{grid-template-columns:1fr}
+  .side{border-right:0;border-bottom:3px double #ccc}
+  .items{grid-template-columns:repeat(2,1fr);row-gap:20px}
+  .tab{display:none}
+  .sec,.sblock{padding-left:18px;padding-right:18px}
+  .srch{width:100%}
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="hd">
+    <a class="logo" href="#apps">
+      <svg width="42" height="46" viewBox="0 0 44 48" aria-hidden="true"><defs><linearGradient id="lgBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6ee6e"/><stop offset=".5" stop-color="#a4c92f"/><stop offset="1" stop-color="#6c9213"/></linearGradient><linearGradient id="lgGloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".8"/><stop offset="1" stop-color="#fff" stop-opacity=".08"/></linearGradient><linearGradient id="lgHandle" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8aa32e"/><stop offset="1" stop-color="#46590f"/></linearGradient></defs><path d="M14 18v-6a8 8 0 0 1 16 0v6" fill="none" stroke="url(#lgHandle)" stroke-width="3.6" stroke-linecap="round"/><path d="M15.4 17v-5a6.6 6.6 0 0 1 4-6" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1" stroke-linecap="round"/><path d="M6 17h32l2.5 26a3 3 0 0 1-3 3.3H6.5a3 3 0 0 1-3-3.3z" fill="url(#lgBody)" stroke="#5a780c" stroke-width="1.2"/><path d="M7.3 18.5h29.4l.6 8.5Q22 34 6.7 27z" fill="url(#lgGloss)"/><path d="M5 44.2h34" stroke="#e4f59a" stroke-opacity=".6" stroke-width="1"/><polygon points="18,30 18,42 29,36" fill="#2f4208" fill-opacity=".45"/><polygon points="18,28.6 18,40.6 29,34.6" fill="#fff"/></svg>
+      Android Market<sup class="beta">beta</sup>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#apps" data-tab="apps">Apps</a>
+      <a href="#games" data-tab="games">Games</a>
+      <a href="#library" data-tab="library">My Library</a>
+    </nav>
+    <form class="srch" onsubmit="return false" role="search">
+      <input type="text" aria-label="Search" placeholder="Search">
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    </form>
+    <a class="signin" id="signinlink" href="#signin">Sign in</a>
+  </div>
+
+  <!-- APPS (home) -->
+  <section class="view" id="v-apps">
+    <div class="hero">
+      <a class="hp l" href="#games">GAMES</a>
+      <a class="hp c" href="#app">
+        <h2>NEW! Version 0.5</h2>
+        <p>Download YouTube Proxy</p>
+        <span class="badge">LATEST</span>
+      </a>
+      <a class="hp r" href="#library">MY LIBRARY</a>
+    </div>
+
+    <div class="top">
+      <div class="cats">
+        <a class="cat a" href="#apps"><i>&#9654;</i>Apps</a>
+        <a class="cat g" href="#games"><i>&#9673;</i>Games</a>
+        <a class="cat m" href="#library"><i>&#9733;</i>Library</a>
+      </div>
+      <div class="tiles">
+        <a class="tile dk o" href="#app"><b>DOWNLOAD v0.5</b><small>The latest release</small></a>
+        <a class="tile" href="#library"><b>My Library</b><small>Your saved apps</small></a>
+        <a class="tile o" href="#app"><b>New: v0.5</b><small>Now available</small></a>
+        <a class="tile dk" href="#games"><b>GAMES</b><small>None yet</small></a>
+        <a class="tile" href="https://github.com/Basket5125/YoutubeLocalProxy/releases" target="_blank" rel="noopener"><b>On GitHub</b><small>See every release</small></a>
+        <div class="tile dk rd"><b>Unofficial</b><small>Only install apps from sources you trust</small></div>
+      </div>
+    </div>
+
+    <div class="main">
+      <aside class="side">
+        <div class="sblock g">
+          <h3>Top Apps</h3>
+          <a class="row" href="#app"><span class="n">1</span><span><b>YouTube Proxy</b><span>Basket5125</span></span></a>
+          <a class="more" href="#app">All Top Apps</a>
+        </div>
+        <div class="sblock o3">
+          <h3>Top Games</h3>
+          <div class="empty">Nothing here yet.</div>
+          <a class="more" href="#games">All Top Games</a>
+        </div>
+      </aside>
+      <div>
+        <div class="sec g">
+          <h3>Featured Apps</h3><span class="tab">&#9654;</span>
+          <div class="items" id="feat"></div>
+          <div class="allr"><a href="#app">All Apps</a></div>
+        </div>
+        <div class="sec b">
+          <h3>Older Versions</h3><span class="tab">&#9776;</span>
+          <div class="items" id="older"></div>
+          <div class="allr"><a href="#app">All Versions</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAMES -->
+  <section class="view pad" id="v-games" hidden>
+    <h3 style="color:var(--orange)">Games</h3>
+    <div class="empty">There are no games here yet.</div>
+  </section>
+
+  <!-- LIBRARY -->
+  <section class="view pad" id="v-library" hidden>
+    <h3 style="color:var(--red)">My Library</h3>
+    <div class="empty" id="libempty">You haven’t saved any apps yet. <a href="#apps" style="color:var(--link)">Browse apps</a> and tap Save.</div>
+    <div class="items" id="libitems"></div>
+    <p class="anote" id="libnote"><a href="#signin" style="color:var(--link)">Sign in</a> to keep your saved apps with your account.</p>
+  </section>
+
+  <!-- SIGN IN / CREATE ACCOUNT -->
+  <section class="view pad" id="v-signin" hidden>
+    <div class="auth">
+      <h3 style="color:var(--green)">Sign in to Android Market</h3>
+      <div class="atabs">
+        <button type="button" class="at on" data-mode="in">Sign in</button>
+        <button type="button" class="at" data-mode="up">Create account</button>
+      </div>
+      <form id="authform">
+        <label>Username<input id="au" type="text" autocomplete="username" maxlength="32" required></label>
+        <label>Password<input id="ap" type="password" autocomplete="current-password" required></label>
+        <label id="aclabel" hidden>Confirm password<input id="ap2" type="password" autocomplete="new-password"></label>
+        <div class="aerr" id="aerr" role="alert"></div>
+        <button class="big" id="asubmit" type="submit" style="margin-top:0;cursor:pointer">Sign in</button>
+      </form>
+      <p class="anote">Accounts are stored only in this browser, on this device. They aren’t synced and aren’t secure, so don’t reuse a real password.</p>
+    </div>
+  </section>
+
+  <!-- ACCOUNT -->
+  <section class="view pad" id="v-account" hidden>
+    <h3 style="color:var(--green)">My Market Account</h3>
+    <dl class="dl">
+      <dt>Username</dt><dd id="acname"></dd>
+      <dt>Member since</dt><dd id="acsince"></dd>
+      <dt>Saved apps</dt><dd id="account"></dd>
+    </dl>
+    <p style="margin-top:22px"><a class="big" href="#library" style="margin:0">My Library</a> <button class="sb" id="signout" type="button">Sign out</button> <button class="sb" id="delacc" type="button">Delete account</button></p>
+  </section>
+
+  <!-- APP DETAIL -->
+  <section class="view pad" id="v-app" hidden>
+    <div class="crumbs"><a href="#apps">Apps</a> &rsaquo; Tools &rsaquo; YouTube Proxy</div>
+    <div class="dhead">
+      <span class="ic" role="img" aria-label="App icon"></span>
+      <div>
+        <h1>YouTube Proxy</h1>
+        <div class="dv" style="margin:0">Basket5125</div>
+        <div style="color:var(--muted);margin-top:6px">Version 0.5 <span class="tag">Latest</span></div>
+        <a class="big" href="https://github.com/Basket5125/YoutubeLocalProxy/releases/download/v0.5/YouTubeProxy-0.5-release.apk" target="_blank" rel="noopener">Install</a>
+        <button class="sv bigsv" type="button" data-v="0.5">+ Save</button>
+      </div>
+    </div>
+
+    <h3 style="color:var(--green)">Description</h3>
+    <p>YouTube Proxy is an unofficial, third-party Android app by Basket5125. Every download on this page links straight to the original release on GitHub. Only install apps from sources you trust.</p>
+
+    <h3 style="color:var(--blue);margin-top:26px">All Versions</h3>
+    <table class="vt">
+      <thead><tr><th>Version</th><th>Download</th></tr></thead>
+      <tbody id="vt"></tbody>
+    </table>
+
+    <h3 style="color:var(--orange);margin-top:26px">Additional Information</h3>
+    <dl class="dl">
+      <dt>Developer</dt><dd><a href="https://github.com/Basket5125" target="_blank" rel="noopener">Basket5125</a></dd>
+      <dt>File type</dt><dd>APK</dd>
+      <dt>Source</dt><dd><a href="https://github.com/Basket5125/YoutubeLocalProxy/releases" target="_blank" rel="noopener">GitHub releases</a></dd>
+    </dl>
+  </section>
+
+  <div class="ft">
+    <span><a class="fl" href="#account">My Market Account</a></span>|
+    <span><select aria-label="Choose a language"><option>Choose a language</option><option>English</option></select></span>|
+    <span>Help</span>
+  </div>
+</div>
+<div class="legal">A Great Fan-Made by Epikman6921 from github<br><b>THIS IS NOT MADE BY GOOGLE</b></div>
+
+<script>
+(function(){
+  var base='https://github.com/Basket5125/YoutubeLocalProxy/releases/download/';
+  var V=[
+    ['0.5','v0.5/YouTubeProxy-0.5-release.apk'],
+    ['0.41','v0.41/YouTubeProxy-0.41-release.apk'],
+    ['0.4','v0.4/YouTubeProxy-0.4-release.apk'],
+    ['0.3','v0.3/YouTubeProxy-0.3-release.apk'],
+    ['0.21','v0.21/YouTubeProxy-0.21-release.apk'],
+    ['0.2','v0.2/YouTubeProxy-0.2-release.apk'],
+    ['0.11','0.11/app-release.apk'],
+    ['0.1','v0.1/app-release.apk']
+  ];
+  function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
+  var mem={};
+  function lsGet(k){try{var v=localStorage.getItem(k);return v==null?(mem[k]||null):v;}catch(e){return mem[k]||null;}}
+  function lsSet(k,v){mem[k]=v;try{localStorage.setItem(k,v);}catch(e){}}
+  function lsDel(k){delete mem[k];try{localStorage.removeItem(k);}catch(e){}}
+  function readJSON(k,d){try{var v=JSON.parse(lsGet(k)||'null');return v==null?d:v;}catch(e){return d;}}
+  var users=readJSON('market-users',{});
+  var me=lsGet('market-session');if(me&&!users[me])me=null;
+  function skey(){return 'market-saved:'+(me||'guest');}
+  var saved=[];
+  function loadSaved(){var s=readJSON(skey(),me?[]:readJSON('market-saved',[]));saved=Array.isArray(s)?s:[];}
+  function persist(){lsSet(skey(),JSON.stringify(saved));}
+  loadSaved();
+  function isSaved(l){return saved.indexOf(l)>-1;}
+  function toggle(l){var i=saved.indexOf(l);if(i>-1)saved.splice(i,1);else saved.push(l);persist();refresh();}
+  function svBtn(l){var b=el('button','sv');b.type='button';b.setAttribute('data-v',l);b.textContent='+ Save';return b;}
+  function refresh(){
+    var box=document.getElementById('libitems'),em=document.getElementById('libempty');
+    box.textContent='';
+    V.forEach(function(v){if(isSaved(v[0]))box.appendChild(item(v));});
+    em.hidden=saved.length>0;
+    document.querySelectorAll('.sv').forEach(function(b){
+      var l=b.getAttribute('data-v');
+      b.textContent=b.closest('#v-library')?'Remove':(isSaved(l)?'Saved ✓':'+ Save');
+    });
+  }
+  document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.sv');if(b)toggle(b.getAttribute('data-v'));});
+  function item(v){
+    var d=el('div','item');
+    var ic=el('a','ic');ic.href='#app';ic.setAttribute('aria-label','YouTube Proxy '+v[0]);
+    var n=el('a');n.href='#app';var b=el('b',null,'YouTube Proxy '+v[0]);n.appendChild(b);
+    var dv=el('span','dv','Basket5125');
+    var i=el('a','ib','Install');i.href=base+v[1];i.target='_blank';i.rel='noopener';
+    d.appendChild(ic);d.appendChild(n);d.appendChild(dv);d.appendChild(i);d.appendChild(svBtn(v[0]));return d;
+  }
+  var feat=document.getElementById('feat'),older=document.getElementById('older'),vt=document.getElementById('vt');
+  V.forEach(function(v,i){
+    (i<4?feat:older).appendChild(item(v));
+    var tr=el('tr'),td=el('td'),td2=el('td');
+    td.appendChild(document.createTextNode('Version '+v[0]));
+    if(i===0)td.appendChild(el('span','tag','Latest'));
+    var a=el('a','ib','Install');a.href=base+v[1];a.target='_blank';a.rel='noopener';
+    td2.appendChild(a);td2.appendChild(svBtn(v[0]));tr.appendChild(td);tr.appendChild(td2);vt.appendChild(tr);
+  });
+
+  function hex(buf){return Array.prototype.map.call(new Uint8Array(buf),function(b){return ('0'+b.toString(16)).slice(-2);}).join('');}
+  function hashPw(salt,pw){var s=window.crypto&&window.crypto.subtle;if(!s)return Promise.reject(new Error('nocrypto'));return s.digest('SHA-256',new TextEncoder().encode(salt+':'+pw)).then(hex);}
+  function newSalt(){var a=new Uint8Array(12);window.crypto.getRandomValues(a);return hex(a);}
+  function saveUsers(){lsSet('market-users',JSON.stringify(users));}
+  var mode='in';
+  var f=document.getElementById('authform'),au=document.getElementById('au'),ap=document.getElementById('ap'),ap2=document.getElementById('ap2'),aerr=document.getElementById('aerr'),asub=document.getElementById('asubmit'),aclabel=document.getElementById('aclabel');
+  function setMode(m){
+    mode=m;
+    document.querySelectorAll('.at').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-mode')===m);});
+    aclabel.hidden=(m!=='up');
+    asub.textContent=m==='up'?'Create account':'Sign in';
+    ap.setAttribute('autocomplete',m==='up'?'new-password':'current-password');
+    aerr.textContent='';
+  }
+  document.querySelectorAll('.at').forEach(function(b){b.addEventListener('click',function(){setMode(b.getAttribute('data-mode'));});});
+  function fail(msg){aerr.textContent=msg;}
+  function updateAuthUI(){
+    var s=document.getElementById('signinlink'),u=me&&users[me];
+    s.textContent=u?('Hi, '+u.name):'Sign in';
+    s.setAttribute('href',u?'#account':'#signin');
+    if(u){
+      document.getElementById('acname').textContent=u.name;
+      document.getElementById('acsince').textContent=new Date(u.created).toLocaleDateString();
+      document.getElementById('account').textContent=String(saved.length);
+    }
+    var n=document.getElementById('libnote');if(n)n.hidden=!!u;
+  }
+  function startSession(key){
+    me=key;lsSet('market-session',key);f.reset();setMode('in');
+    loadSaved();refresh();updateAuthUI();
+    location.hash='#account';route();
+  }
+  f.addEventListener('submit',function(e){
+    e.preventDefault();aerr.textContent='';
+    var raw=au.value.trim(),key=raw.toLowerCase(),pw=ap.value;
+    if(!/^[a-z0-9_.-]{3,32}$/.test(key))return fail('Username must be 3–32 letters, numbers, dots, dashes or underscores.');
+    if(pw.length<6)return fail('Password must be at least 6 characters.');
+    if(mode==='up'){
+      if(pw!==ap2.value)return fail('The passwords don’t match.');
+      if(users[key])return fail('That username is taken.');
+      var salt;try{salt=newSalt();}catch(x){return fail('This browser can’t create accounts.');}
+      hashPw(salt,pw).then(function(h){
+        users[key]={name:raw,salt:salt,hash:h,created:Date.now()};saveUsers();
+        var guest=readJSON('market-saved:guest',[]),mine=[];
+        guest.forEach(function(v){if(mine.indexOf(v)<0)mine.push(v);});
+        lsSet('market-saved:'+key,JSON.stringify(mine));
+        startSession(key);
+      }).catch(function(){fail('This browser can’t create accounts.');});
+    }else{
+      var u=users[key];
+      if(!u)return fail('Wrong username or password.');
+      hashPw(u.salt,pw).then(function(h){
+        if(h!==u.hash)return fail('Wrong username or password.');
+        startSession(key);
+      }).catch(function(){fail('This browser can’t sign in.');});
+    }
+  });
+  document.getElementById('signout').addEventListener('click',function(){
+    me=null;lsDel('market-session');loadSaved();refresh();updateAuthUI();
+    location.hash='#apps';route();
+  });
+  document.getElementById('delacc').addEventListener('click',function(){
+    var b=this;
+    if(b.getAttribute('data-arm')!=='1'){
+      b.setAttribute('data-arm','1');b.textContent='Click again to delete';
+      setTimeout(function(){b.removeAttribute('data-arm');b.textContent='Delete account';},4000);
+      return;
+    }
+    delete users[me];saveUsers();lsDel('market-saved:'+me);
+    me=null;lsDel('market-session');loadSaved();refresh();updateAuthUI();
+    location.hash='#apps';route();
+  });
+  refresh();updateAuthUI();
+  var views=['apps','games','library','app','signin','account'];
+  function route(){
+    var h=(location.hash||'').slice(1);
+    if(views.indexOf(h)<0)h='apps';
+    if(h==='account'&&!me)h='signin';
+    if(h==='signin'&&me)h='account';
+    updateAuthUI();
+    views.forEach(function(v){document.getElementById('v-'+v).hidden=(v!==h);});
+    var t=h==='app'?'apps':h;
+    document.querySelectorAll('.nav a').forEach(function(a){
+      var on=a.getAttribute('data-tab')===t;
+      a.classList.toggle('on',on);
+      if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');
+    });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener('hashchange',route);
+  route();
+})();
+</script>
+</body>
+</html>
