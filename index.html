@@ -103,6 +103,13 @@ h3{font:400 22px "Open Sans",Arial,sans-serif;margin:0 0 14px}
 .ic::after{content:"";position:absolute;left:29px;top:21px;border-left:26px solid #fff;border-top:18px solid transparent;border-bottom:18px solid transparent}
 .item b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .req{display:block;color:#c0392b;font:bold 10px Arial;text-transform:uppercase;margin:0 0 4px}
+.arow{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.arow .ic{width:64px;height:64px;border-radius:12px;margin:0;flex:none}
+.arow .ic::after{left:24px;top:17px;border-left:22px solid #fff;border-top:15px solid transparent;border-bottom:15px solid transparent}
+.arow .at{flex:1;min-width:0}
+.arow .at b{display:block;font-size:15px}
+.arow .ab{flex:none;white-space:nowrap}
+@media(max-width:520px){.arow{flex-wrap:wrap}.arow .ab{width:100%}}
 .warn{background:#fdecea;border:1px solid #e0a8a2;border-left:5px solid #c0392b;color:#7a1f16;padding:12px 14px;margin:0 0 22px;font-size:14px}
 .warn b{display:block;font-size:17px;margin-bottom:2px}
 .warn a{color:var(--link);text-decoration:underline}
@@ -117,7 +124,8 @@ h3{font:400 22px "Open Sans",Arial,sans-serif;margin:0 0 14px}
 /* footer */
 .ft{background:#3a3a3a;color:#fff;text-align:center;padding:26px 14px;font-size:13px;margin-top:0}
 .ft span{margin:0 14px}
-.ft select{font-size:12px;margin:0 6px}
+.ft select{font-size:13px;margin:0 6px;padding:3px 6px;border:1px solid #999;background:#fff;color:#222;cursor:pointer}
+.view h4{font:600 15px Arial,sans-serif;margin:20px 0 4px}
 .legal{max-width:1026px;margin:0 auto;text-align:center;color:#888;font-size:11px;padding:10px 14px 28px}
 
 .fl:hover{text-decoration:underline}
@@ -177,7 +185,7 @@ p{margin:0 0 10px}
       Android Market<sup class="beta">beta</sup>
     </a>
     <nav class="nav" aria-label="Sections">
-      <a href="#apps" data-tab="apps">Apps</a>
+      <a href="#applist" data-tab="applist">Apps</a>
       <a href="#games" data-tab="games">Games</a>
       <a href="#library" data-tab="library">My Library</a>
     </nav>
@@ -202,7 +210,7 @@ p{margin:0 0 10px}
 
     <div class="top">
       <div class="cats">
-        <a class="cat a" href="#apps"><i>&#9654;</i>Apps</a>
+        <a class="cat a" href="#applist"><i>&#9654;</i>Apps</a>
         <a class="cat g" href="#games"><i>&#9673;</i>Games</a>
         <a class="cat m" href="#library"><i>&#9733;</i>Library</a>
       </div>
@@ -222,7 +230,7 @@ p{margin:0 0 10px}
           <h3>Top Apps</h3>
           <a class="row" href="#app"><span class="n">1</span><span><b>YouTube Proxy</b><span>Basket5125</span></span></a>
           <a class="row" href="#youtube"><span class="n">2</span><span><b>YouTube</b><span>Google LLC</span></span></a>
-          <a class="more" href="#app">All Top Apps</a>
+          <a class="more" href="#applist">All Top Apps</a>
         </div>
         <div class="sblock o3">
           <h3>Top Games</h3>
@@ -234,7 +242,7 @@ p{margin:0 0 10px}
         <div class="sec g">
           <h3>Featured Apps</h3><span class="tab">&#9654;</span>
           <div class="items" id="feat"></div>
-          <div class="allr"><a href="#app">All Apps</a></div>
+          <div class="allr"><a href="#applist">All Apps</a></div>
         </div>
         <div class="sec b">
           <h3>Older Versions</h3><span class="tab">&#9776;</span>
@@ -243,6 +251,13 @@ p{margin:0 0 10px}
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- APP LIST -->
+  <section class="view pad" id="v-applist" hidden>
+    <div class="crumbs"><a href="#apps">Home</a> &rsaquo; Apps</div>
+    <h3 style="color:var(--green)">Apps</h3>
+    <div id="alist"></div>
   </section>
 
   <!-- GAMES -->
@@ -254,7 +269,7 @@ p{margin:0 0 10px}
   <!-- LIBRARY -->
   <section class="view pad" id="v-library" hidden>
     <h3 style="color:var(--red)">My Library</h3>
-    <div class="empty" id="libempty">You haven’t saved any apps yet. <a href="#apps" style="color:var(--link)">Browse apps</a> and tap Save.</div>
+    <div class="empty" id="libempty">You haven’t saved any apps yet. <a href="#applist" style="color:var(--link)">Browse apps</a> and tap Save.</div>
     <div class="items" id="libitems"></div>
     <p class="anote" id="libnote"><a href="#signin" style="color:var(--link)">Sign in</a> to keep your saved apps with your account.</p>
   </section>
@@ -289,9 +304,25 @@ p{margin:0 0 10px}
     <p style="margin-top:22px"><a class="big" href="#library" style="margin:0">My Library</a> <button class="sb" id="signout" type="button">Sign out</button> <button class="sb" id="delacc" type="button">Delete account</button></p>
   </section>
 
+  <!-- HELP -->
+  <section class="view pad" id="v-help" hidden>
+    <div class="crumbs"><a href="#apps">Home</a> &rsaquo; Help</div>
+    <h3 style="color:var(--green)">Help</h3>
+    <h4>How do I install an app?</h4>
+    <p>Tap <b>Install</b> on any app. Your browser downloads an APK file. Open it on your Android phone, allow installs from this source if Android asks, then tap Install.</p>
+    <h4>What does “Requires YouTube Proxy” mean?</h4>
+    <p>The YouTube versions need <a href="#app" style="color:var(--link)">YouTube Proxy</a> to work. Install YouTube Proxy first, then YouTube.</p>
+    <h4>How does Save work?</h4>
+    <p>Tap <b>+ Save</b> on an app to add it to My Library. If you’re signed in, the list belongs to your account.</p>
+    <h4>Where is my account stored?</h4>
+    <p>Accounts and saved apps are stored only in this browser, on this device. They aren’t synced to other devices.</p>
+    <h4>Something isn’t working</h4>
+    <p>Try reloading the page. App files are hosted by their developers, so a download can fail if their server is down.</p>
+  </section>
+
   <!-- YOUTUBE DETAIL -->
   <section class="view pad" id="v-youtube" hidden>
-    <div class="crumbs"><a href="#apps">Apps</a> &rsaquo; Video &rsaquo; YouTube</div>
+    <div class="crumbs"><a href="#applist">Apps</a> &rsaquo; Video &rsaquo; YouTube</div>
     <div class="dhead">
       <span class="ic yt" role="img" aria-label="YouTube icon"></span>
       <div>
@@ -332,7 +363,7 @@ p{margin:0 0 10px}
 
   <!-- APP DETAIL -->
   <section class="view pad" id="v-app" hidden>
-    <div class="crumbs"><a href="#apps">Apps</a> &rsaquo; Tools &rsaquo; YouTube Proxy</div>
+    <div class="crumbs"><a href="#applist">Apps</a> &rsaquo; Tools &rsaquo; YouTube Proxy</div>
     <div class="dhead">
       <span class="ic" role="img" aria-label="App icon"></span>
       <div>
@@ -363,8 +394,8 @@ p{margin:0 0 10px}
 
   <div class="ft">
     <span><a class="fl" href="#account">My Market Account</a></span>|
-    <span><select aria-label="Choose a language"><option>Choose a language</option><option>English</option></select></span>|
-    <span>Help</span>
+    <span><select id="langsel" aria-label="Choose a language"><option value="" disabled>Choose a language</option><option value="en" selected>English</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="nl">Nederlands</option></select></span>|
+    <span><a class="fl" href="#help">Help</a></span>
   </div>
 </div>
 <div class="legal">A Great Fan-Made by Epikman6921 from github<br><b>THIS IS NOT MADE BY GOOGLE</b></div>
@@ -422,6 +453,21 @@ p{margin:0 0 10px}
   }
   var feat=document.getElementById('feat'),older=document.getElementById('older'),vt=document.getElementById('vt');
   feat.appendChild(card(YT));
+  function arow(o){
+    var r=el('div','arow');
+    var ic=el('a','ic'+(o.ytic?' yt':''));ic.href=o.page;ic.setAttribute('aria-label',o.name);
+    var t=el('div','at');
+    var n=el('a');n.href=o.page;n.appendChild(el('b',null,o.name));
+    t.appendChild(n);t.appendChild(el('span','dv',o.dev));
+    if(o.note)t.appendChild(el('span',o.plain?'dv':'req',o.note));
+    var ab=el('div','ab');
+    var i=el('a','ib','Install');i.href=o.url;i.target='_blank';i.rel='noopener';
+    ab.appendChild(i);ab.appendChild(svBtn(o.key));
+    r.appendChild(ic);r.appendChild(t);r.appendChild(ab);return r;
+  }
+  var alist=document.getElementById('alist');
+  alist.appendChild(arow({key:V[0][0],name:'YouTube Proxy',dev:'Basket5125',url:base+V[0][1],page:'#app',ytic:false,note:'Version '+V[0][0],plain:true}));
+  alist.appendChild(arow(YT));
   V.forEach(function(v,i){
     (i<3?feat:older).appendChild(item(v));
     var tr=el('tr'),td=el('td'),td2=el('td');
@@ -504,7 +550,7 @@ p{margin:0 0 10px}
     location.hash='#apps';route();
   });
   refresh();updateAuthUI();
-  var views=['apps','games','library','app','signin','account','youtube'];
+  var views=['apps','applist','games','library','app','signin','account','youtube','help'];
   function route(){
     var h=(location.hash||'').slice(1);
     if(views.indexOf(h)<0)h='apps';
@@ -512,7 +558,7 @@ p{margin:0 0 10px}
     if(h==='signin'&&me)h='account';
     updateAuthUI();
     views.forEach(function(v){document.getElementById('v-'+v).hidden=(v!==h);});
-    var t=(h==='app'||h==='youtube')?'apps':h;
+    var t=(h==='app'||h==='youtube'||h==='apps')?'applist':h;
     document.querySelectorAll('.nav a').forEach(function(a){
       var on=a.getAttribute('data-tab')===t;
       a.classList.toggle('on',on);
@@ -522,6 +568,46 @@ p{margin:0 0 10px}
   }
   window.addEventListener('hashchange',route);
   route();
+})();
+</script>
+<script>
+(function(){
+  var T={
+    es:{'Apps':'Aplicaciones','Games':'Juegos','My Library':'Mi biblioteca','Library':'Biblioteca','Sign in':'Iniciar sesión','Create account':'Crear cuenta','Install':'Instalar','+ Save':'+ Guardar','Saved ✓':'Guardado ✓','Remove':'Quitar','My Market Account':'Mi cuenta de Market','Help':'Ayuda','Featured Apps':'Aplicaciones destacadas','Older Versions':'Versiones anteriores','Top Apps':'Mejores aplicaciones','Top Games':'Mejores juegos','All Apps':'Todas las aplicaciones','Description':'Descripción','Additional Information':'Información adicional','All Versions':'Todas las versiones','Home':'Inicio','Sign out':'Cerrar sesión','Username':'Usuario','Password':'Contraseña','Latest':'Última'},
+    fr:{'Apps':'Applications','Games':'Jeux','My Library':'Ma bibliothèque','Library':'Bibliothèque','Sign in':'Se connecter','Create account':'Créer un compte','Install':'Installer','+ Save':'+ Enregistrer','Saved ✓':'Enregistré ✓','Remove':'Retirer','My Market Account':'Mon compte Market','Help':'Aide','Featured Apps':'Applications à la une','Older Versions':'Anciennes versions','Top Apps':'Meilleures applications','Top Games':'Meilleurs jeux','All Apps':'Toutes les applications','Description':'Description','Additional Information':'Informations complémentaires','All Versions':'Toutes les versions','Home':'Accueil','Sign out':'Se déconnecter','Username':'Nom d’utilisateur','Password':'Mot de passe','Latest':'Dernière'},
+    de:{'Apps':'Apps','Games':'Spiele','My Library':'Meine Bibliothek','Library':'Bibliothek','Sign in':'Anmelden','Create account':'Konto erstellen','Install':'Installieren','+ Save':'+ Speichern','Saved ✓':'Gespeichert ✓','Remove':'Entfernen','My Market Account':'Mein Market-Konto','Help':'Hilfe','Featured Apps':'Empfohlene Apps','Older Versions':'Ältere Versionen','Top Apps':'Top-Apps','Top Games':'Top-Spiele','All Apps':'Alle Apps','Description':'Beschreibung','Additional Information':'Zusätzliche Informationen','All Versions':'Alle Versionen','Home':'Startseite','Sign out':'Abmelden','Username':'Benutzername','Password':'Passwort','Latest':'Neueste'},
+    nl:{'Apps':'Apps','Games':'Games','My Library':'Mijn bibliotheek','Library':'Bibliotheek','Sign in':'Inloggen','Create account':'Account maken','Install':'Installeren','+ Save':'+ Opslaan','Saved ✓':'Opgeslagen ✓','Remove':'Verwijderen','My Market Account':'Mijn Market-account','Help':'Help','Featured Apps':'Aanbevolen apps','Older Versions':'Oudere versies','Top Apps':'Topapps','Top Games':'Topgames','All Apps':'Alle apps','Description':'Beschrijving','Additional Information':'Aanvullende informatie','All Versions':'Alle versies','Home':'Home','Sign out':'Uitloggen','Username':'Gebruikersnaam','Password':'Wachtwoord','Latest':'Nieuwste'}
+  };
+  var PH={en:'Search',es:'Buscar',fr:'Rechercher',de:'Suchen',nl:'Zoeken'};
+  var root=document.querySelector('.page'),sel=document.getElementById('langsel');
+  var lang='en',orig=new WeakMap();
+  var mo=new MutationObserver(function(){apply();});
+  function skip(n){var p=n.parentNode;return !p||/^(SCRIPT|STYLE|OPTION|SELECT|TEXTAREA)$/.test(p.nodeName);}
+  function apply(){
+    mo.disconnect();
+    var dict=T[lang]||{},w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),n,list=[];
+    while((n=w.nextNode()))list.push(n);
+    list.forEach(function(n){
+      if(skip(n))return;
+      var base=orig.has(n)?orig.get(n):n.nodeValue,tr=dict[base.trim()];
+      if(tr){
+        if(!orig.has(n))orig.set(n,base);
+        n.nodeValue=base.match(/^\s*/)[0]+tr+base.match(/\s*$/)[0];
+      }else if(orig.has(n)){
+        n.nodeValue=orig.get(n);orig.delete(n);
+      }
+    });
+    document.documentElement.lang=lang;
+    var inp=document.querySelector('.srch input');if(inp)inp.setAttribute('placeholder',PH[lang]||'Search');
+    mo.observe(root,{childList:true,subtree:true,characterData:true});
+  }
+  sel.addEventListener('change',function(){
+    lang=sel.value||'en';
+    try{localStorage.setItem('market-lang',lang);}catch(e){}
+    apply();
+  });
+  try{var s=localStorage.getItem('market-lang');if(s&&PH[s]){lang=s;sel.value=s;}}catch(e){}
+  apply();
 })();
 </script>
 </body>
