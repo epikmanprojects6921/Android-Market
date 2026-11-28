@@ -17,8 +17,8 @@
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
 *,*::before,*::after{box-sizing:inherit}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:#e8e8e8;color:var(--ink);font:13px/1.45 Arial,Helvetica,sans-serif}
+html{scroll-padding-top:env(safe-area-inset-top,0px);overflow-y:scroll;scrollbar-gutter:stable}
+body{margin:0;overflow-x:hidden;background:#e8e8e8;color:var(--ink);font:13px/1.45 Arial,Helvetica,sans-serif}
 a{color:inherit;text-decoration:none}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #4d90fe;outline-offset:2px}
 .view[hidden]{display:none}
@@ -59,9 +59,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 
 /* categories + tiles */
 .top{display:grid;grid-template-columns:275px 1fr;gap:20px;padding:30px 24px 24px 14px}
-.cats{padding-left:0}
-.cat{display:flex;align-items:center;height:56px;background:#eee;margin-bottom:4px;font:300 22px "Open Sans",Arial,sans-serif;text-transform:uppercase}
-.cat i{width:78px;height:56px;margin-right:12px;margin-left:0;display:grid;place-items:center;color:#fff;font-style:normal;font-size:24px}
+.cats{padding-left:0;display:flex;flex-direction:column}
+.cat{display:flex;align-items:center;flex:1;min-height:56px;background:#eee;margin-bottom:4px;font:300 22px "Open Sans",Arial,sans-serif;text-transform:uppercase}
+.cat i{width:78px;align-self:stretch;margin-right:12px;margin-left:0;display:grid;place-items:center;color:#fff;font-style:normal;font-size:24px}
+.cat:last-child{margin-bottom:0}
 .cat.a{color:var(--green)}.cat.a i{background:var(--lgreen)}
 .cat.g{color:var(--orange)}.cat.g i{background:var(--orange)}
 .cat.v{color:var(--blue)}.cat.v i{background:var(--blue)}
@@ -74,6 +75,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .tile.o{border-bottom-color:var(--orange)}
 .tile.rd{border-bottom-color:var(--red)}
 .tile.o b{color:#f07b10}
+.tile:last-child{grid-column:span 2}
 
 /* main */
 .main{display:grid;grid-template-columns:318px 1fr;border-top:3px double #ccc}
@@ -95,7 +97,7 @@ h3{font:400 22px "Open Sans",Arial,sans-serif;margin:0 0 14px}
 .sec:last-child{border-bottom:0}
 .sec h3{margin-bottom:12px}
 .sec.g h3{color:var(--green)}.sec.b h3{color:var(--blue)}
-.tab{position:absolute;right:-4px;top:14px;width:77px;height:40px;display:grid;place-items:center;color:#fff;font-size:20px;border-radius:2px 0 0 2px}
+.tab{position:absolute;right:0;top:14px;width:77px;height:40px;display:grid;place-items:center;color:#fff;font-size:20px;border-radius:2px 0 0 2px}
 .sec.g .tab{background:var(--lgreen)}.sec.b .tab{background:var(--blue)}
 .items{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;border-bottom:1px solid var(--line);padding-bottom:14px}
 .item{min-width:0}
@@ -190,7 +192,7 @@ p{margin:0 0 10px}
       <a href="#library" data-tab="library">My Library</a>
     </nav>
     <form class="srch" onsubmit="return false" role="search">
-      <input type="text" aria-label="Search" placeholder="Search">
+      <input type="text" id="q" autocomplete="off" aria-label="Search" placeholder="Search">
       <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
     </form>
     <a class="signin" id="signinlink" href="#signin">Sign in</a>
@@ -220,7 +222,6 @@ p{margin:0 0 10px}
         <a class="tile o" href="#app"><b>New: v0.5</b><small>Now available</small></a>
         <a class="tile dk" href="#games"><b>GAMES</b><small>None yet</small></a>
         <a class="tile" href="https://github.com/Basket5125/YoutubeLocalProxy/releases" target="_blank" rel="noopener"><b>On GitHub</b><small>See every release</small></a>
-        <div class="tile dk rd"><b>Unofficial</b><small>Only install apps from sources you trust</small></div>
       </div>
     </div>
 
@@ -251,6 +252,13 @@ p{margin:0 0 10px}
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- SEARCH -->
+  <section class="view pad" id="v-search" hidden>
+    <h3 style="color:var(--green)"><span>Search results for</span> “<span id="sq"></span>”</h3>
+    <div id="sres"></div>
+    <div class="empty" id="snone" hidden>No apps found.</div>
   </section>
 
   <!-- APP LIST -->
@@ -549,13 +557,34 @@ p{margin:0 0 10px}
     me=null;lsDel('market-session');loadSaved();refresh();updateAuthUI();
     location.hash='#apps';route();
   });
+  var qi=document.getElementById('q'),sres=document.getElementById('sres'),snone=document.getElementById('snone'),sq=document.getElementById('sq');
+  var CAT=[
+    {o:{key:V[0][0],name:'YouTube Proxy',dev:'Basket5125',url:base+V[0][1],page:'#app',ytic:false,note:'Version '+V[0][0],plain:true},hay:'youtube proxy basket5125 tools android apk '+V.map(function(v){return v[0];}).join(' ')},
+    {o:YT,hay:'youtube google llc video android apk requires proxy fake login real login patched 14.38.53 12.45.56 5.1.10 4.3.9 2.4.4'}
+  ];
+  function runSearch(){
+    var raw=qi.value.trim(),words=raw.toLowerCase().split(/\s+/).filter(Boolean);
+    sq.textContent=raw;sres.textContent='';
+    var hits=CAT.filter(function(c){return words.every(function(w){return c.hay.indexOf(w)>-1;});});
+    hits.forEach(function(c){sres.appendChild(arow(c.o));});
+    snone.hidden=hits.length>0;
+    refresh();
+  }
+  qi.addEventListener('input',function(){
+    if(!qi.value.trim()){if(location.hash==='#search'){location.hash='#apps';}return;}
+    if(location.hash!=='#search'){location.hash='#search';}else{runSearch();}
+  });
+  qi.closest('form').addEventListener('submit',function(){
+    if(qi.value.trim()){if(location.hash!=='#search'){location.hash='#search';}else{runSearch();}}
+  });
   refresh();updateAuthUI();
-  var views=['apps','applist','games','library','app','signin','account','youtube','help'];
+  var views=['apps','applist','games','library','app','signin','account','youtube','help','search'];
   function route(){
     var h=(location.hash||'').slice(1);
     if(views.indexOf(h)<0)h='apps';
     if(h==='account'&&!me)h='signin';
     if(h==='signin'&&me)h='account';
+    if(h==='search')runSearch();
     updateAuthUI();
     views.forEach(function(v){document.getElementById('v-'+v).hidden=(v!==h);});
     var t=(h==='app'||h==='youtube'||h==='apps')?'applist':h;
@@ -578,8 +607,93 @@ p{margin:0 0 10px}
     de:{'Apps':'Apps','Games':'Spiele','My Library':'Meine Bibliothek','Library':'Bibliothek','Sign in':'Anmelden','Create account':'Konto erstellen','Install':'Installieren','+ Save':'+ Speichern','Saved ✓':'Gespeichert ✓','Remove':'Entfernen','My Market Account':'Mein Market-Konto','Help':'Hilfe','Featured Apps':'Empfohlene Apps','Older Versions':'Ältere Versionen','Top Apps':'Top-Apps','Top Games':'Top-Spiele','All Apps':'Alle Apps','Description':'Beschreibung','Additional Information':'Zusätzliche Informationen','All Versions':'Alle Versionen','Home':'Startseite','Sign out':'Abmelden','Username':'Benutzername','Password':'Passwort','Latest':'Neueste'},
     nl:{'Apps':'Apps','Games':'Games','My Library':'Mijn bibliotheek','Library':'Bibliotheek','Sign in':'Inloggen','Create account':'Account maken','Install':'Installeren','+ Save':'+ Opslaan','Saved ✓':'Opgeslagen ✓','Remove':'Verwijderen','My Market Account':'Mijn Market-account','Help':'Help','Featured Apps':'Aanbevolen apps','Older Versions':'Oudere versies','Top Apps':'Topapps','Top Games':'Topgames','All Apps':'Alle apps','Description':'Beschrijving','Additional Information':'Aanvullende informatie','All Versions':'Alle versies','Home':'Home','Sign out':'Uitloggen','Username':'Gebruikersnaam','Password':'Wachtwoord','Latest':'Nieuwste'}
   };
+  var R=[
+    ['Search results for','Resultados de búsqueda para','Résultats de recherche pour','Suchergebnisse für','Zoekresultaten voor'],
+    ['No apps found.','No se encontraron aplicaciones.','Aucune application trouvée.','Keine Apps gefunden.','Geen apps gevonden.'],
+    ['Version','Versión','Version','Version','Versie'],
+    ['Hi,','Hola,','Bonjour,','Hallo,','Hoi,'],
+    ['FAKE LOGIN','LOGIN FALSO','FAUSSE CONNEXION','FALSCHER LOGIN','NEP-LOGIN'],
+    ['SUPPORTS REAL LOGIN','ADMITE LOGIN REAL','PREND EN CHARGE LA VRAIE CONNEXION','UNTERSTÜTZT ECHTEN LOGIN','ONDERSTEUNT ECHTE LOGIN'],
+    ['Download','Descargar','Télécharger','Herunterladen','Downloaden'],
+    ['GAMES','JUEGOS','JEUX','SPIELE','GAMES'],
+    ['MY LIBRARY','MI BIBLIOTECA','MA BIBLIOTHÈQUE','MEINE BIBLIOTHEK','MIJN BIBLIOTHEEK'],
+    ['NEW! Version 0.5','¡NUEVO! Versión 0.5','NOUVEAU ! Version 0.5','NEU! Version 0.5','NIEUW! Versie 0.5'],
+    ['Download YouTube Proxy','Descarga YouTube Proxy','Téléchargez YouTube Proxy','YouTube Proxy herunterladen','Download YouTube Proxy'],
+    ['LATEST','ÚLTIMA','DERNIÈRE','NEUESTE','NIEUWSTE'],
+    ['DOWNLOAD v0.5','DESCARGAR v0.5','TÉLÉCHARGER v0.5','v0.5 HERUNTERLADEN','DOWNLOAD v0.5'],
+    ['The latest release','La última versión','La dernière version','Die neueste Version','De nieuwste versie'],
+    ['Your saved apps','Tus aplicaciones guardadas','Vos applications enregistrées','Deine gespeicherten Apps','Je opgeslagen apps'],
+    ['New: v0.5','Nuevo: v0.5','Nouveau : v0.5','Neu: v0.5','Nieuw: v0.5'],
+    ['Now available','Ya disponible','Disponible maintenant','Jetzt verfügbar','Nu beschikbaar'],
+    ['None yet','Aún ninguno','Aucun pour l’instant','Noch keine','Nog geen'],
+    ['On GitHub','En GitHub','Sur GitHub','Auf GitHub','Op GitHub'],
+    ['See every release','Ver todas las versiones','Voir toutes les versions','Alle Releases ansehen','Bekijk alle releases'],
+    ['Unofficial','No oficial','Non officiel','Inoffiziell','Onofficieel'],
+    ['Only install apps from sources you trust','Instala solo aplicaciones de fuentes de confianza','N’installez que des applications provenant de sources fiables','Installiere nur Apps aus vertrauenswürdigen Quellen','Installeer alleen apps uit bronnen die je vertrouwt'],
+    ['All Top Apps','Todas las mejores aplicaciones','Toutes les meilleures applications','Alle Top-Apps','Alle topapps'],
+    ['All Top Games','Todos los mejores juegos','Tous les meilleurs jeux','Alle Top-Spiele','Alle topgames'],
+    ['Nothing here yet.','Aún no hay nada aquí.','Rien ici pour l’instant.','Hier ist noch nichts.','Hier is nog niets.'],
+    ['Requires YouTube Proxy','Requiere YouTube Proxy','Nécessite YouTube Proxy','Benötigt YouTube Proxy','Vereist YouTube Proxy'],
+    ['There are no games here yet.','Todavía no hay juegos aquí.','Il n’y a pas encore de jeux ici.','Hier gibt es noch keine Spiele.','Er zijn hier nog geen games.'],
+    ['You haven’t saved any apps yet.','Aún no has guardado ninguna aplicación.','Vous n’avez encore enregistré aucune application.','Du hast noch keine Apps gespeichert.','Je hebt nog geen apps opgeslagen.'],
+    ['Browse apps','Explora las aplicaciones','Parcourir les applications','Apps durchsuchen','Bekijk de apps'],
+    ['and tap Save.','y toca Guardar.','et appuyez sur Enregistrer.','und tippe auf Speichern.','en tik op Opslaan.'],
+    ['to keep your saved apps with your account.','para conservar tus aplicaciones guardadas en tu cuenta.','pour conserver vos applications enregistrées dans votre compte.','um deine gespeicherten Apps in deinem Konto zu behalten.','om je opgeslagen apps in je account te bewaren.'],
+    ['Sign in to Android Market','Inicia sesión en Android Market','Connectez-vous à Android Market','Bei Android Market anmelden','Log in bij Android Market'],
+    ['Confirm password','Confirmar contraseña','Confirmer le mot de passe','Passwort bestätigen','Bevestig wachtwoord'],
+    ['Accounts are stored only in this browser, on this device. They aren’t synced and aren’t secure, so don’t reuse a real password.','Las cuentas se guardan solo en este navegador, en este dispositivo. No se sincronizan y no son seguras, así que no reutilices una contraseña real.','Les comptes sont stockés uniquement dans ce navigateur, sur cet appareil. Ils ne sont pas synchronisés et ne sont pas sécurisés ; ne réutilisez donc pas un vrai mot de passe.','Konten werden nur in diesem Browser auf diesem Gerät gespeichert. Sie werden nicht synchronisiert und sind nicht sicher. Verwende daher kein echtes Passwort erneut.','Accounts worden alleen in deze browser op dit apparaat opgeslagen. Ze worden niet gesynchroniseerd en zijn niet veilig, dus gebruik geen echt wachtwoord opnieuw.'],
+    ['Member since','Miembro desde','Membre depuis','Mitglied seit','Lid sinds'],
+    ['Saved apps','Aplicaciones guardadas','Applications enregistrées','Gespeicherte Apps','Opgeslagen apps'],
+    ['Delete account','Eliminar cuenta','Supprimer le compte','Konto löschen','Account verwijderen'],
+    ['Click again to delete','Haz clic de nuevo para eliminar','Cliquez à nouveau pour supprimer','Zum Löschen erneut klicken','Klik nogmaals om te verwijderen'],
+    ['Username must be 3–32 letters, numbers, dots, dashes or underscores.','El nombre de usuario debe tener entre 3 y 32 letras, números, puntos, guiones o guiones bajos.','Le nom d’utilisateur doit contenir de 3 à 32 lettres, chiffres, points, tirets ou traits de soulignement.','Der Benutzername muss 3–32 Buchstaben, Ziffern, Punkte, Bindestriche oder Unterstriche enthalten.','De gebruikersnaam moet 3–32 letters, cijfers, punten, streepjes of underscores bevatten.'],
+    ['Password must be at least 6 characters.','La contraseña debe tener al menos 6 caracteres.','Le mot de passe doit contenir au moins 6 caractères.','Das Passwort muss mindestens 6 Zeichen lang sein.','Het wachtwoord moet minstens 6 tekens bevatten.'],
+    ['The passwords don’t match.','Las contraseñas no coinciden.','Les mots de passe ne correspondent pas.','Die Passwörter stimmen nicht überein.','De wachtwoorden komen niet overeen.'],
+    ['That username is taken.','Ese nombre de usuario ya está en uso.','Ce nom d’utilisateur est déjà pris.','Dieser Benutzername ist bereits vergeben.','Die gebruikersnaam is al in gebruik.'],
+    ['Wrong username or password.','Usuario o contraseña incorrectos.','Nom d’utilisateur ou mot de passe incorrect.','Falscher Benutzername oder falsches Passwort.','Onjuiste gebruikersnaam of wachtwoord.'],
+    ['This browser can’t create accounts.','Este navegador no puede crear cuentas.','Ce navigateur ne peut pas créer de comptes.','Dieser Browser kann keine Konten erstellen.','Deze browser kan geen accounts maken.'],
+    ['This browser can’t sign in.','Este navegador no puede iniciar sesión.','Ce navigateur ne peut pas se connecter.','Dieser Browser kann sich nicht anmelden.','Deze browser kan niet inloggen.'],
+    ['› Tools › YouTube Proxy','› Herramientas › YouTube Proxy','› Outils › YouTube Proxy','› Tools › YouTube Proxy','› Hulpmiddelen › YouTube Proxy'],
+    ['› Video › YouTube','› Vídeo › YouTube','› Vidéo › YouTube','› Video › YouTube','› Video › YouTube'],
+    ['› Apps','› Aplicaciones','› Applications','› Apps','› Apps'],
+    ['› Help','› Ayuda','› Aide','› Hilfe','› Help'],
+    ['YouTube Proxy is an unofficial, third-party Android app by Basket5125. Every download on this page links straight to the original release on GitHub. Only install apps from sources you trust.','YouTube Proxy es una aplicación de Android no oficial, de terceros, creada por Basket5125. Cada descarga de esta página enlaza directamente con la versión original en GitHub. Instala solo aplicaciones de fuentes de confianza.','YouTube Proxy est une application Android non officielle, développée par un tiers, Basket5125. Chaque téléchargement de cette page renvoie directement vers la version d’origine sur GitHub. N’installez que des applications provenant de sources fiables.','YouTube Proxy ist eine inoffizielle Android-App von Basket5125, einem Drittanbieter. Jeder Download auf dieser Seite verweist direkt auf das ursprüngliche Release auf GitHub. Installiere nur Apps aus vertrauenswürdigen Quellen.','YouTube Proxy is een onofficiële Android-app van een externe ontwikkelaar, Basket5125. Elke download op deze pagina verwijst rechtstreeks naar de originele release op GitHub. Installeer alleen apps uit bronnen die je vertrouwt.'],
+    ['Developer','Desarrollador','Développeur','Entwickler','Ontwikkelaar'],
+    ['File type','Tipo de archivo','Type de fichier','Dateityp','Bestandstype'],
+    ['Source','Fuente','Source','Quelle','Bron'],
+    ['GitHub releases','Versiones en GitHub','Versions sur GitHub','GitHub-Releases','GitHub-releases'],
+    ['Requires','Requiere','Nécessite','Benötigt','Vereist'],
+    ['REQUIRED YOUTUBE PROXY TO WORK!','¡SE REQUIERE YOUTUBE PROXY PARA QUE FUNCIONE!','YOUTUBE PROXY EST REQUIS POUR FONCTIONNER !','YOUTUBE PROXY IST ERFORDERLICH, DAMIT ES FUNKTIONIERT!','YOUTUBE PROXY IS VEREIST OM TE WERKEN!'],
+    ['This app needs','Esta aplicación necesita','Cette application a besoin de','Diese App benötigt','Deze app heeft'],
+    ['to work.','para funcionar.','pour fonctionner.','um zu funktionieren.','nodig om te werken.'],
+    ['YouTube is Google’s video app for Android. Watch videos, follow channels you like, and upload your own.','YouTube es la aplicación de vídeo de Google para Android. Mira vídeos, sigue los canales que te gusten y sube los tuyos.','YouTube est l’application vidéo de Google pour Android. Regardez des vidéos, suivez vos chaînes préférées et publiez les vôtres.','YouTube ist die Video-App von Google für Android. Sieh dir Videos an, folge Kanälen, die dir gefallen, und lade eigene hoch.','YouTube is de video-app van Google voor Android. Bekijk video’s, volg kanalen die je leuk vindt en upload je eigen video’s.'],
+    ['Tap','Toca','Appuyez sur','Tippe auf','Tik op'],
+    ['How do I install an app?','¿Cómo instalo una aplicación?','Comment installer une application ?','Wie installiere ich eine App?','Hoe installeer ik een app?'],
+    ['on any app. Your browser downloads an APK file. Open it on your Android phone, allow installs from this source if Android asks, then tap Install.','en cualquier aplicación. Tu navegador descarga un archivo APK. Ábrelo en tu teléfono Android, permite instalar desde esta fuente si Android lo pide y toca Instalar.','sur n’importe quelle application. Votre navigateur télécharge un fichier APK. Ouvrez-le sur votre téléphone Android, autorisez les installations depuis cette source si Android le demande, puis appuyez sur Installer.','bei einer beliebigen App. Dein Browser lädt eine APK-Datei herunter. Öffne sie auf deinem Android-Telefon, erlaube Installationen aus dieser Quelle, falls Android danach fragt, und tippe dann auf Installieren.','bij een app. Je browser downloadt een APK-bestand. Open het op je Android-telefoon, sta installaties van deze bron toe als Android erom vraagt en tik dan op Installeren.'],
+    ['What does “Requires YouTube Proxy” mean?','¿Qué significa «Requiere YouTube Proxy»?','Que signifie « Nécessite YouTube Proxy » ?','Was bedeutet „Benötigt YouTube Proxy“?','Wat betekent ‘Vereist YouTube Proxy’?'],
+    ['The YouTube versions need','Las versiones de YouTube necesitan','Les versions de YouTube ont besoin de','Die YouTube-Versionen funktionieren nur mit','De YouTube-versies hebben'],
+    ['to work. Install YouTube Proxy first, then YouTube.','para funcionar. Instala primero YouTube Proxy y después YouTube.','pour fonctionner. Installez d’abord YouTube Proxy, puis YouTube.','zusammen. Installiere zuerst YouTube Proxy und dann YouTube.','nodig om te werken. Installeer eerst YouTube Proxy en daarna YouTube.'],
+    ['How does Save work?','¿Cómo funciona Guardar?','Comment fonctionne Enregistrer ?','Wie funktioniert Speichern?','Hoe werkt Opslaan?'],
+    ['on an app to add it to My Library. If you’re signed in, the list belongs to your account.','en una aplicación para añadirla a Mi biblioteca. Si has iniciado sesión, la lista pertenece a tu cuenta.','sur une application pour l’ajouter à Ma bibliothèque. Si vous êtes connecté, la liste appartient à votre compte.','bei einer App, um sie zu Meine Bibliothek hinzuzufügen. Wenn du angemeldet bist, gehört die Liste zu deinem Konto.','bij een app om die aan Mijn bibliotheek toe te voegen. Als je bent ingelogd, hoort de lijst bij je account.'],
+    ['Where is my account stored?','¿Dónde se guarda mi cuenta?','Où mon compte est-il stocké ?','Wo wird mein Konto gespeichert?','Waar wordt mijn account opgeslagen?'],
+    ['Accounts and saved apps are stored only in this browser, on this device. They aren’t synced to other devices.','Las cuentas y las aplicaciones guardadas se almacenan solo en este navegador, en este dispositivo. No se sincronizan con otros dispositivos.','Les comptes et les applications enregistrées sont stockés uniquement dans ce navigateur, sur cet appareil. Ils ne sont pas synchronisés avec d’autres appareils.','Konten und gespeicherte Apps werden nur in diesem Browser auf diesem Gerät gespeichert. Sie werden nicht mit anderen Geräten synchronisiert.','Accounts en opgeslagen apps worden alleen in deze browser op dit apparaat bewaard. Ze worden niet met andere apparaten gesynchroniseerd.'],
+    ['Something isn’t working','Algo no funciona','Quelque chose ne fonctionne pas','Etwas funktioniert nicht','Er werkt iets niet'],
+    ['Try reloading the page. App files are hosted by their developers, so a download can fail if their server is down.','Prueba a recargar la página. Los archivos de las aplicaciones los alojan sus desarrolladores, así que una descarga puede fallar si su servidor no funciona.','Essayez de recharger la page. Les fichiers des applications sont hébergés par leurs développeurs ; un téléchargement peut donc échouer si leur serveur est en panne.','Lade die Seite neu. Die App-Dateien werden von den Entwicklern gehostet, daher kann ein Download fehlschlagen, wenn deren Server nicht erreichbar ist.','Probeer de pagina opnieuw te laden. De appbestanden worden door de ontwikkelaars gehost, dus een download kan mislukken als hun server niet werkt.'],
+    ['A Great Fan-Made by Epikman6921 from github','Un gran proyecto de fans de Epikman6921 desde github','Un excellent projet de fan par Epikman6921 sur github','Ein großartiges Fanprojekt von Epikman6921 auf github','Een geweldig fanproject van Epikman6921 op github'],
+    ['THIS IS NOT MADE BY GOOGLE','ESTO NO ESTÁ HECHO POR GOOGLE','CECI N’EST PAS FAIT PAR GOOGLE','DAS WURDE NICHT VON GOOGLE ERSTELLT','DIT IS NIET GEMAAKT DOOR GOOGLE']
+  ];
+  R.forEach(function(r){T.es[r[0]]=r[1];T.fr[r[0]]=r[2];T.de[r[0]]=r[3];T.nl[r[0]]=r[4];});
+  function lookup(key){
+    var d=T[lang];if(!d)return null;
+    if(d[key])return d[key];
+    var m=key.match(/^Version ([\d.]+)(?: \((.+)\))?$/);
+    if(m){var s=d['Version']+' '+m[1];if(m[2])s+=' ('+(d[m[2]]||m[2])+')';return s;}
+    m=key.match(/^Hi, (.+)$/);
+    if(m)return d['Hi,']+' '+m[1];
+    return null;
+  }
   var PH={en:'Search',es:'Buscar',fr:'Rechercher',de:'Suchen',nl:'Zoeken'};
-  var root=document.querySelector('.page'),sel=document.getElementById('langsel');
+  var root=document.body,sel=document.getElementById('langsel');
   var lang='en',orig=new WeakMap();
   var mo=new MutationObserver(function(){apply();});
   function skip(n){var p=n.parentNode;return !p||/^(SCRIPT|STYLE|OPTION|SELECT|TEXTAREA)$/.test(p.nodeName);}
@@ -589,7 +703,7 @@ p{margin:0 0 10px}
     while((n=w.nextNode()))list.push(n);
     list.forEach(function(n){
       if(skip(n))return;
-      var base=orig.has(n)?orig.get(n):n.nodeValue,tr=dict[base.trim()];
+      var base=orig.has(n)?orig.get(n):n.nodeValue,tr=lookup(base.trim());
       if(tr){
         if(!orig.has(n))orig.set(n,base);
         n.nodeValue=base.match(/^\s*/)[0]+tr+base.match(/\s*$/)[0];
